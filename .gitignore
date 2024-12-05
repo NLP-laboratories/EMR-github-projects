@@ -11,3 +11,12 @@ NestedNER/GlobalPointer_GAT/datasets/CHD/*
 
 NestedNER/GlobalPointer_GAT/datasets/CMeEE-V2/*
 !NestedNER/GlobalPointer_GAT/datasets/CMeEE-V2/.gitignore
+
+
+# GlobalPointer_GAT_Boundary 忽略规则
+# GlobalPointer_GAT 忽略规则
+NestedNER/GlobalPointer_GAT_Boundary/datasets/CHD/*
+!NestedNER/GlobalPointer_GAT_Boundary/datasets/CHD/.gitignore
+
+NestedNER/GlobalPointer_GAT_Boundary/datasets/CMeEE-V2/*
+!NestedNER/GlobalPointer_GAT_Boundary/datasets/CMeEE-V2/.gitignore
