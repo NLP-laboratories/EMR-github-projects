@@ -1,0 +1,4 @@
+# 忽略规则
+NestedNER/GlobalPointer_pytorch/datasets/CHD/*
+!NestedNER/GlobalPointer_pytorch/datasets/CHD/.gitignore
+
