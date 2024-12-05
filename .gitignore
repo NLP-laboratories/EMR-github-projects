@@ -1,4 +1,7 @@
-# 忽略规则
+# Gobalpointer_pytorch 忽略规则
 NestedNER/GlobalPointer_pytorch/datasets/CHD/*
 !NestedNER/GlobalPointer_pytorch/datasets/CHD/.gitignore
 
+# GlobalPointer_GAT 忽略规则
+NestedNER/GlobalPointer_GAT/datasets/CHD/*
+!NestedNER/GlobalPointer_GAT/datasets/CHD/.gitignore
