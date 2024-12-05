@@ -10,4 +10,4 @@ NestedNER/GlobalPointer_GAT/datasets/CHD/*
 !NestedNER/GlobalPointer_GAT/datasets/CHD/.gitignore
 
 NestedNER/GlobalPointer_GAT/datasets/CMeEE-V2/*
-!NestedNER/GlobalPointer_GAT/datasets/CMeEE/.gitignore
+!NestedNER/GlobalPointer_GAT/datasets/CMeEE-V2/.gitignore
