@@ -2,6 +2,12 @@
 NestedNER/GlobalPointer_pytorch/datasets/CHD/*
 !NestedNER/GlobalPointer_pytorch/datasets/CHD/.gitignore
 
+NestedNER/GlobalPointer_pytorch/datasets/CMeEE-V2/*
+!NestedNER/GlobalPointer_pytorch/datasets/CMeEE-V2/.gitignore
+
 # GlobalPointer_GAT 忽略规则
 NestedNER/GlobalPointer_GAT/datasets/CHD/*
 !NestedNER/GlobalPointer_GAT/datasets/CHD/.gitignore
+
+NestedNER/GlobalPointer_GAT/datasets/CMeEE-V2/*
+!NestedNER/GlobalPointer_GAT/datasets/CMeEE/.gitignore
