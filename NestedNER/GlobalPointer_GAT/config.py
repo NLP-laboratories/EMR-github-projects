@@ -6,7 +6,7 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 # 通用配置
 common = {
-    "exp_name": "cluerner",
+    "exp_name": "cluener",
     "encoder": "BERT",
     "data_home": os.path.join(BASE_DIR, "datasets"),
     "bert_path": os.path.join(BASE_DIR, "pretrained_models", "bert-base-chinese"),  # 相对路径拼接
@@ -23,10 +23,10 @@ wandb_config = {
 
 # 训练配置
 train_config = {
-    "train_data": os.path.join(BASE_DIR, "datasets", "cluerner", "train.json"),
-    "valid_data": os.path.join(BASE_DIR, "datasets", "cluerner", "dev.json"),
-    "test_data": os.path.join(BASE_DIR, "datasets", "cluerner", "dev.json"),
-    "ent2id": os.path.join(BASE_DIR, "datasets", "cluerner", "ent2id.json"),
+    "train_data": os.path.join(BASE_DIR, "datasets", "cluener", "train.json"),
+    "valid_data": os.path.join(BASE_DIR, "datasets", "cluener", "dev.json"),
+    "test_data": os.path.join(BASE_DIR, "datasets", "cluener", "dev.json"),
+    "ent2id": os.path.join(BASE_DIR, "datasets", "cluener", "ent2id.json"),
     "path_to_save_model": os.path.join(BASE_DIR, "outputs/"),
     "hyper_parameters": {
         "lr": 2e-5,
@@ -43,8 +43,8 @@ eval_config = {
     "model_state_dir": os.path.join(BASE_DIR, "outputs/"),  # 预测时填写模型路径
     "run_id": "",
     "last_k_model": 1,
-    "predict_data": os.path.join(BASE_DIR, "datasets", "cluerner", "test.json"),
-    "ent2id": os.path.join(BASE_DIR, "datasets", "cluerner", "ent2id.json"),
+    "predict_data": os.path.join(BASE_DIR, "datasets", "cluener", "test.json"),
+    "ent2id": os.path.join(BASE_DIR, "datasets", "cluener", "ent2id.json"),
     "save_res_dir": os.path.join(BASE_DIR, "results"),
     "hyper_parameters": {
         "batch_size": 32,
