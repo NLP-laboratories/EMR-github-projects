@@ -23,7 +23,7 @@ config["num_workers"] = 6 if sys.platform.startswith("linux") else 0
 # for reproductivity
 torch.backends.cudnn.deterministic = True
 
-tokenizer = BertTokenizerFast.from_pretrained(config["bert_path"], add_special_tokens=True, do_lower_case=False)
+tokenizer = BertTokenizerFast.from_pretrained(config["bert_path"], do_lower_case=False)
 
 
 def load_data(data_path, data_type="predict"):
