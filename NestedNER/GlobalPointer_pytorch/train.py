@@ -2,7 +2,7 @@
 Date: 2021-05-31 19:50:58
 LastEditors: GodK
 """
-
+import numpy as np
 import os
 import config
 import sys
@@ -17,25 +17,25 @@ import glob
 import wandb
 from evaluate import load_model
 import time
+from sklearn.metrics import classification_report, precision_recall_fscore_support
+import logging
+
 
 config = config.train_config
 hyper_parameters = config["hyper_parameters"]
 
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:5" if torch.cuda.is_available() else "cpu")
 config["num_workers"] = 6 if sys.platform.startswith("linux") else 0
 
 # for reproductivity
 torch.manual_seed(hyper_parameters["seed"])  # pytorch random seed
 torch.backends.cudnn.deterministic = True
 
+# Initialize wandb
 if config["logger"] == "wandb" and config["run_type"] == "train":
-    # init wandb
-    wandb.init(project="GlobalPointer_" + config["exp_name"],
-               config=hyper_parameters  # Initialize config
-               )
+    wandb.init(project="GlobalPointer_pytorch_" + config["exp_name"], config=hyper_parameters)
     wandb.run.name = config["run_name"] + "_" + wandb.run.id
-
     model_state_dict_dir = wandb.run.dir
     logger = wandb
 elif config["run_type"] == "train":
@@ -43,6 +43,7 @@ elif config["run_type"] == "train":
                                         time.strftime("%Y-%m-%d_%H.%M.%S", time.gmtime()))
     if not os.path.exists(model_state_dict_dir):
         os.makedirs(model_state_dict_dir)
+
 
 tokenizer = BertTokenizerFast.from_pretrained(config["bert_path"], add_special_tokens=True, do_lower_case=False)
 
@@ -103,12 +104,17 @@ def data_generator(data_type="train"):
 
     # TODO:句子截取
     max_tok_num = 0
+    problematic_sample = None
     for sample in all_data:
         tokens = tokenizer(sample["text"])["input_ids"]
-        max_tok_num = max(max_tok_num, len(tokens))
+        if len(tokens) > max_tok_num:
+            max_tok_num = len(tokens)
+            problematic_sample = sample["text"]
     assert max_tok_num <= hyper_parameters[
         "max_seq_len"], f'数据文本最大token数量{max_tok_num}超过预设{hyper_parameters["max_seq_len"]}'
     max_seq_len = min(max_tok_num, hyper_parameters["max_seq_len"])
+
+
 
     data_maker = DataMaker(tokenizer)
 
@@ -150,23 +156,22 @@ metrics = MetricsCalculator()
 
 
 def train_step(batch_train, model, optimizer, criterion):
-    # batch_input_ids:(batch_size, seq_len)    batch_labels:(batch_size, ent_type_size, seq_len, seq_len)
     batch_samples, batch_input_ids, batch_attention_mask, batch_token_type_ids, batch_labels = batch_train
-    batch_input_ids, batch_attention_mask, batch_token_type_ids, batch_labels = (batch_input_ids.to(device),
-                                                                                 batch_attention_mask.to(device),
-                                                                                 batch_token_type_ids.to(device),
-                                                                                 batch_labels.to(device)
-                                                                                 )
-
+    batch_input_ids, batch_attention_mask, batch_token_type_ids, batch_labels = (
+        batch_input_ids.to(device),
+        batch_attention_mask.to(device),
+        batch_token_type_ids.to(device),
+        batch_labels.to(device)
+    )
     logits = model(batch_input_ids, batch_attention_mask, batch_token_type_ids)
-
     loss = criterion(batch_labels, logits)
 
     optimizer.zero_grad()
     loss.backward()
     optimizer.step()
-
     return loss.item()
+
+
 
 
 encoder = BertModel.from_pretrained(config["bert_path"])
@@ -180,7 +185,7 @@ if config["logger"] == "wandb" and config["run_type"] == "train":
 def train(model, dataloader, epoch, optimizer):
     model.train()
 
-    # loss func
+    # 定义损失函数
     def loss_fun(y_true, y_pred):
         """
         y_true:(batch_size, ent_type_size, seq_len, seq_len)
@@ -191,7 +196,8 @@ def train(model, dataloader, epoch, optimizer):
         y_pred = y_pred.reshape(batch_size * ent_type_size, -1)
         loss = multilabel_categorical_crossentropy(y_true, y_pred)
         return loss
-
+    
+    
     # scheduler
     if hyper_parameters["scheduler"] == "CAWR":
         T_mult = hyper_parameters["T_mult"]
@@ -206,90 +212,116 @@ def train(model, dataloader, epoch, optimizer):
     else:
         scheduler = None
 
+    total_loss = 0.0
     pbar = tqdm(enumerate(dataloader), total=len(dataloader))
-    total_loss = 0.
     for batch_ind, batch_data in pbar:
-
         loss = train_step(batch_data, model, optimizer, loss_fun)
-
         total_loss += loss
-
         avg_loss = total_loss / (batch_ind + 1)
         if scheduler is not None:
             scheduler.step()
-
-        pbar.set_description(
-            f'Project:{config["exp_name"]}, Epoch: {epoch + 1}/{hyper_parameters["epochs"]}, Step: {batch_ind + 1}/{len(dataloader)}')
+        pbar.set_description(f"Epoch {epoch + 1}/{hyper_parameters['epochs']}")
         pbar.set_postfix(loss=avg_loss, lr=optimizer.param_groups[0]["lr"])
+    if config["logger"] == "wandb":
+        logger.log({"Train Loss": avg_loss, "epoch": epoch + 1})
+    return avg_loss
 
-        if config["logger"] == "wandb" and batch_ind % config["log_interval"] == 0:
-            logger.log({
-                "epoch": epoch,
-                "train_loss": avg_loss,
-                "learning_rate": optimizer.param_groups[0]['lr'],
-            })
+
 
 
 def valid_step(batch_valid, model):
     batch_samples, batch_input_ids, batch_attention_mask, batch_token_type_ids, batch_labels = batch_valid
-    batch_input_ids, batch_attention_mask, batch_token_type_ids, batch_labels = (batch_input_ids.to(device),
-                                                                                 batch_attention_mask.to(device),
-                                                                                 batch_token_type_ids.to(device),
-                                                                                 batch_labels.to(device)
-                                                                                 )
+    batch_input_ids, batch_attention_mask, batch_token_type_ids, batch_labels = (
+        batch_input_ids.to(device),
+        batch_attention_mask.to(device),
+        batch_token_type_ids.to(device),
+        batch_labels.to(device)
+    )
+
     with torch.no_grad():
         logits = model(batch_input_ids, batch_attention_mask, batch_token_type_ids)
-    sample_f1, sample_precision, sample_recall = metrics.get_evaluate_fpr(logits, batch_labels)
+    # 将 logits 转换为预测值
+    predictions = torch.sigmoid(logits) > 0.5
+    predictions = predictions.cpu().numpy()
+    batch_labels = batch_labels.cpu().numpy()
 
-    return sample_f1, sample_precision, sample_recall
+    return batch_labels, predictions
 
 
-def valid(model, dataloader):
+def valid(model, dataloader, epoch):
     model.eval()
-
-    total_f1, total_precision, total_recall = 0., 0., 0.
+    all_labels = []
+    all_predictions = []
     for batch_data in tqdm(dataloader, desc="Validating"):
-        f1, precision, recall = valid_step(batch_data, model)
-
-        total_f1 += f1
-        total_precision += precision
-        total_recall += recall
-
-    avg_f1 = total_f1 / (len(dataloader))
-    avg_precision = total_precision / (len(dataloader))
-    avg_recall = total_recall / (len(dataloader))
-    print("******************************************")
-    print(f'avg_precision: {avg_precision}, avg_recall: {avg_recall}, avg_f1: {avg_f1}')
-    print("******************************************")
+        # 获取验证数据的预测值和标签
+        batch_labels, batch_predictions = valid_step(batch_data, model)  # 不再处理损失值
+        all_labels.append(batch_labels)
+        all_predictions.append(batch_predictions)
+    
+    # 计算全局指标
+    all_labels = np.concatenate(all_labels, axis=0).reshape(-1, ent_type_size)
+    all_predictions = np.concatenate(all_predictions, axis=0).reshape(-1, ent_type_size)
+    report = classification_report(all_labels, all_predictions, target_names=list(ent2id.keys()), digits=4, output_dict=True)
+    micro_f1 = report["micro avg"]["f1-score"]
+    precision = report["micro avg"]["precision"]
+    recall = report["micro avg"]["recall"]
+    formatted_report = classification_report(all_labels, all_predictions, target_names=list(ent2id.keys()), digits=4)
+    print(formatted_report)
+    
+    # Log metrics to wandb
     if config["logger"] == "wandb":
-        logger.log({"valid_precision": avg_precision, "valid_recall": avg_recall, "valid_f1": avg_f1})
-    return avg_f1
+        logger.log({
+            "Validation F1 Score": micro_f1,
+            "Validation Precision": precision,
+            "Validation Recall": recall
+        })
+        # Record the formatted classification report
+        table = wandb.Table(columns=["Report"], data=[[line] for line in formatted_report.split("\n")])
+        logger.log({"Validation Classification Report": table})
+
+    return report, formatted_report
 
 
 if __name__ == '__main__':
     if config["run_type"] == "train":
         train_dataloader, valid_dataloader = data_generator()
 
-        # optimizer
+        # 定义优化器
         init_learning_rate = float(hyper_parameters["lr"])
         optimizer = torch.optim.Adam(model.parameters(), lr=init_learning_rate)
 
-        max_f1 = 0.
+        max_f1 = 0.0
+        best_epoch = 0 
         for epoch in range(hyper_parameters["epochs"]):
-            train(model, train_dataloader, epoch, optimizer)
-            valid_f1 = valid(model, valid_dataloader)
+            # 训练阶段
+            train_loss = train(model, train_dataloader, epoch, optimizer)
+            
+            # 验证阶段
+            valid_report, formatted_report = valid(model, valid_dataloader, epoch)
+            valid_f1 = valid_report["micro avg"]["f1-score"]
+
+            # 记录日志
+            logging.info(f"Epoch {epoch + 1} - Train Loss: {train_loss:.4f}")
+            logging.info(f"\nValidation Report:\n{formatted_report}")
+            print(f"Epoch {epoch + 1} - Train Loss: {train_loss:.4f}, Valid F1: {valid_f1:.4f}")
+
+            # 保存模型
             if valid_f1 > max_f1:
                 max_f1 = valid_f1
-                if valid_f1 > config["f1_2_save"]:  # save the best model
-                    model_state_num = len(glob.glob(model_state_dict_dir + "/model_state_dict_*.pt"))
-                    torch.save(model.state_dict(),
-                               os.path.join(model_state_dict_dir, "model_state_dict_{}.pt".format(model_state_num)))
-            print(f"Best F1: {max_f1}")
-            print("******************************************")
-            if config["logger"] == "wandb":
-                logger.log({"Best_F1": max_f1})
+                best_epoch = epoch + 1
+                torch.save(model.state_dict(), os.path.join(model_state_dict_dir, f"model_state_{epoch + 1}.pt"))
+                print(f"New best model saved at epoch {best_epoch} with F1: {max_f1:.8f}")
+                logging.info(f"New best model saved at epoch {best_epoch} with F1: {max_f1:.8f}")
+            logging.info(f"Epoch {epoch + 1} - Best Valid F1: {max_f1:.8f}")
+
+        # 打印最终最佳 F1 值和对应的轮次
+        print(f"Training complete. Best Valid F1: {max_f1:.8f} at epoch {best_epoch}.")
+        logging.info(f"Training complete. Best Valid F1: {max_f1:.8f} at epoch {best_epoch}.")
+
     elif config["run_type"] == "eval":
         # 此处的 eval 是为了评估测试集的 p r f1（如果测试集有标签的情况），无标签预测使用 evaluate.py
         model = load_model()
         test_dataloader = data_generator(data_type="test")
         valid(model, test_dataloader)
+
+
