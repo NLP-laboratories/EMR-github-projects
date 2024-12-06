@@ -62,8 +62,6 @@ FlatNER/BERT_BiLSTM_CGCN_att_CRF/HuggingFace_Model/LTP_BASE1/*
 FlatNER/BERT_BiLSTM_CGCN_att_CRF/input/*
 !FlatNER/BERT_BiLSTM_CGCN_att_CRF/input/.gitignore
 
-FlatNER/BERT_BiLSTM_CGCN_att_CRF/output/*
-!FlatNER/BERT_BiLSTM_CGCN_att_CRF/output/.gitignore
 
 FlatNER/BERT_BiLSTM_CGCN_att_CRF/output/annotation/*
 !FlatNER/BERT_BiLSTM_CGCN_att_CRF/output/annotation/.gitignore
