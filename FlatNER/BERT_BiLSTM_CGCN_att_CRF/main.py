@@ -15,7 +15,7 @@ import warnings
 warnings.filterwarnings("ignore")
 writer = SummaryWriter(log_dir='/home/deng/Maping/EMR-github-projects/FlatNER/BERT_BiLSTM_CGCN_att_CRF/Tensorboard/')
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "4"
+os.environ["CUDA_VISIBLE_DEVICES"] = "7"
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 ltp = LTP(LTP_PATH)
