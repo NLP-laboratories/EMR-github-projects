@@ -34,7 +34,7 @@ FlatNER/BERT_BiLSTM_CRF/input/*
 !FlatNER/BERT_BiLSTM_CRF/input/.gitignore
 
 FlatNER/BERT_BiLSTM_CRF/runs/*
-!FlatNER/BERT_BiLSTM_CRF/input/.gitignore
+!FlatNER/BERT_BiLSTM_CRF/runs/.gitignore
 
 FlatNER/BERT_BiLSTM_CRF/Tensorboard/*
 !FlatNER/BERT_BiLSTM_CRF/Tensorboard/.gitignore
