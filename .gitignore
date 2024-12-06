@@ -46,3 +46,31 @@ FlatNER/BERT_BiLSTM_CRF/output/model/*
 !FlatNER/BERT_BiLSTM_CRF/output/model/.gitignore
 
 
+# BERT_BiLSTM_CGCN_att_CRF 忽略规则
+FlatNER/BERT_BiLSTM_CGCN_att_CRF/HuggingFace_Model/*
+!FlatNER/BERT_BiLSTM_CGCN_att_CRF/HuggingFace_Model/.gitignore
+
+FlatNER/BERT_BiLSTM_CGCN_att_CRF/HuggingFace_Model/bert-base-chinese/*
+!FlatNER/BERT_BiLSTM_CGCN_att_CRF/HuggingFace_Model/bert-base-chinese/.gitignore
+
+FlatNER/BERT_BiLSTM_CGCN_att_CRF/HuggingFace_Model/Fasttext_model/*
+!FlatNER/BERT_BiLSTM_CGCN_att_CRF/HuggingFace_Model/Fasttext_model/.gitignore
+
+FlatNER/BERT_BiLSTM_CGCN_att_CRF/HuggingFace_Model/LTP_BASE1/*
+!FlatNER/BERT_BiLSTM_CGCN_att_CRF/HuggingFace_Model/LTP_BASE1/.gitignore
+
+FlatNER/BERT_BiLSTM_CGCN_att_CRF/input/*
+!FlatNER/BERT_BiLSTM_CGCN_att_CRF/input/.gitignore
+
+FlatNER/BERT_BiLSTM_CGCN_att_CRF/output/*
+!FlatNER/BERT_BiLSTM_CGCN_att_CRF/output/.gitignore
+
+FlatNER/BERT_BiLSTM_CGCN_att_CRF/output/annotation/*
+!FlatNER/BERT_BiLSTM_CGCN_att_CRF/output/annotation/.gitignore
+
+FlatNER/BERT_BiLSTM_CGCN_att_CRF/output/dataset/*
+!FlatNER/BERT_BiLSTM_CGCN_att_CRF/output/dataset/.gitignore
+
+FlatNER/BERT_BiLSTM_CGCN_att_CRF/output/model/*
+!FlatNER/BERT_BiLSTM_CGCN_att_CRF/output/model/.gitignore
+
