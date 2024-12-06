@@ -33,6 +33,14 @@ FlatNER/BERT_BiLSTM_CRF/HuggingFace_Model/bert-base-chinese/*
 FlatNER/BERT_BiLSTM_CRF/input/*
 !FlatNER/BERT_BiLSTM_CRF/input/.gitignore
 
+FlatNER/BERT_BiLSTM_CRF/runs/*
+!FlatNER/BERT_BiLSTM_CRF/input/.gitignore
+
+FlatNER/BERT_BiLSTM_CRF/Tensorboard/*
+!FlatNER/BERT_BiLSTM_CRF/Tensorboard/.gitignore
+
+
+
 FlatNER/BERT_BiLSTM_CRF/output/outputs/*
 !FlatNER/BERT_BiLSTM_CRF/output/outputs/.gitignore
 
@@ -61,6 +69,12 @@ FlatNER/BERT_BiLSTM_CGCN_att_CRF/HuggingFace_Model/LTP_BASE1/*
 
 FlatNER/BERT_BiLSTM_CGCN_att_CRF/input/*
 !FlatNER/BERT_BiLSTM_CGCN_att_CRF/input/.gitignore
+
+FlatNER/BERT_BiLSTM_CGCN_att_CRF/runs/*
+!FlatNER/BERT_BiLSTM_CGCN_att_CRF/runs/.gitignore
+
+FlatNER/BERT_BiLSTM_CGCN_att_CRF/Tensorboard/*
+!FlatNER/BERT_BiLSTM_CGCN_att_CRF/Tensorboard/.gitignore
 
 
 FlatNER/BERT_BiLSTM_CGCN_att_CRF/output/annotation/*
