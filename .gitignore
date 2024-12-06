@@ -20,3 +20,29 @@ NestedNER/GlobalPointer_GAT_Boundary/datasets/CHD/*
 
 NestedNER/GlobalPointer_GAT_Boundary/datasets/CMeEE-V2/*
 !NestedNER/GlobalPointer_GAT_Boundary/datasets/CMeEE-V2/.gitignore
+
+# FlatNER规则指定
+
+# BERT-BiLSTM-CRF忽略规则
+FlatNER/BERT_BiLSTM_CRF/HuggingFace_Model/*
+!FlatNER/BERT_BiLSTM_CRF/HuggingFace_Model/.gitignore
+
+FlatNER/BERT_BiLSTM_CRF/HuggingFace_Model/bert-base-chinese/*
+!FlatNER/BERT_BiLSTM_CRF/HuggingFace_Model/bert-base-chinese/.gitignore
+
+FlatNER/BERT_BiLSTM_CRF/input/*
+!FlatNER/BERT_BiLSTM_CRF/input/.gitignore
+
+FlatNER/BERT_BiLSTM_CRF/output/outputs/*
+!FlatNER/BERT_BiLSTM_CRF/output/outputs/.gitignore
+
+FlatNER/BERT_BiLSTM_CRF/output/annotation/*
+!FlatNER/BERT_BiLSTM_CRF/output/annotation/.gitignore
+
+FlatNER/BERT_BiLSTM_CRF/output/dataset/*
+!FlatNER/BERT_BiLSTM_CRF/output/dataset/.gitignore
+
+FlatNER/BERT_BiLSTM_CRF/output/model/*
+!FlatNER/BERT_BiLSTM_CRF/output/model/.gitignore
+
+
